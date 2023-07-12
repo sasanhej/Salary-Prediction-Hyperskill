@@ -96,8 +96,11 @@ files:
         Stage5Test().run_tests()
   learner_created: false
 feedback_link: https://hyperskill.org/learn/step/22705#comment
-status: Solved
+status: Failed
 feedback:
-  message: Congratulations!
-  time: "Sun, 28 May 2023 02:11:08 UTC"
+  message: |-
+    Error in test #1
+
+    In this test, the program is running for a long time, more than 15 seconds. Most likely, the program has gone into an infinite loop.
+  time: "Wed, 12 Jul 2023 12:15:01 UTC"
 record: 5

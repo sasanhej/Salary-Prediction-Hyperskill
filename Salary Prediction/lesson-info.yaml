@@ -5,4 +5,4 @@ content:
 - Linear regression with many independent variables
 - Test for multicollinearity and variables selection
 - Deal with negative predictions
-current_task: 1
+current_task: 4

@@ -6,6 +6,7 @@ import pandas as pd
 import numpy as np
 from sklearn.linear_model import LinearRegression
 import matplotlib.pyplot as plt
+import itertools
 
 # checking ../Data directory presence
 if not os.path.exists('../Data'):
@@ -21,8 +22,10 @@ if 'data.csv' not in os.listdir('../Data'):
 data = pd.read_csv('../Data/data.csv')
 
 
-def regmodel(X, y, test_size=0.3, random_state=100):
+def regmodel(X, y, test_size=0.3, random_state=100, drop=list([])):
     regdict = {}
+    if drop != list([]):
+        X = X.drop(columns=drop)
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=random_state)
     model = LinearRegression()
     model.fit(X_train, y_train)
@@ -38,7 +41,7 @@ def regmodel(X, y, test_size=0.3, random_state=100):
     return regdict
 
 
-def plotreg(X, y, dic, i):
+def plotreg(X, y, dic, i=1):
     Xp = X**i
     yp = y
     plt.scatter(Xp, yp)
@@ -70,9 +73,51 @@ for i in range(1, 5):
     MAPE.append(power[i]['MAPE'])
     plotreg(X, y, power, i)
 print(f'{min(MAPE):.5f}')
-'''
 
+#Stage 3/5
 target = 'salary'
 X = data.drop(columns=[target])
 y = pd.Series(data[target])
-print(*regmodel(X,y)['coef'])
+print(*regmodel(X,y)['coef'], sep=", ")
+
+plt.title("Salary predictions vs. Salary real data")
+plt.xlabel("Predictions")
+plt.ylabel("Real Data")
+plt.scatter(regmodel(X,y)['y_pred'], regmodel(X,y)['y_test'])
+g = np.linspace(max(regmodel(X,y)['y_pred'].min(),regmodel(X,y)['y_test'].min()), min(regmodel(X,y)['y_pred'].max(),regmodel(X,y)['y_test'].max()), 10)
+plt.plot(g, g, '-r')
+plt.show()
+
+#Stage 4/5
+high_corel = list([])
+corel_matrix = data.drop(columns='salary').corr()
+for i in itertools.combinations(corel_matrix.columns, 2):
+    if abs(corel_matrix.loc[i]) > 0.2:
+        high_corel.append([i[0], i[1]])
+        if i[0] not in high_corel:
+            high_corel.append(i[0])
+        if i[1] not in high_corel:
+            high_corel.append(i[1])
+target = 'salary'
+MAPE=[]
+X = data.drop(columns=[target])
+y = pd.Series(data[target])
+for i in high_corel:
+    iter = regmodel(X, y, drop=i)
+    MAPE.append(iter['MAPE'])
+print(f'{min(MAPE):.5f}')
+'''
+#Stage 4/5
+target = 'salary'
+drop = ['age', 'experience']
+X = data.drop(columns=[target])
+y = pd.Series(data[target])
+
+middle = regmodel(X, y, drop=drop)
+
+y_pred_0 = np.array([0 if i < 0 else i for i in middle['y_pred']])
+y_pred_median = np.array([middle['y_train'].median() if i < 0 else i for i in middle['y_pred']])
+
+MAPE_0 = mean_absolute_percentage_error(middle['y_test'], y_pred_0)
+MAPE_median = mean_absolute_percentage_error(middle['y_test'], y_pred_median)
+print(f'{min(MAPE_0,MAPE_median):.5f}')
