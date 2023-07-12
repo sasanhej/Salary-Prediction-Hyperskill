@@ -107,7 +107,7 @@ for i in high_corel:
     MAPE.append(iter['MAPE'])
 print(f'{min(MAPE):.5f}')
 '''
-#Stage 4/5
+#Stage 5/5
 target = 'salary'
 drop = ['age', 'experience']
 X = data.drop(columns=[target])
